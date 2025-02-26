@@ -29,12 +29,9 @@ export default function RootLayout({ children }) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex h-screen w-screen overflow-hidden`}>
         <SidebarProvider>
           <AppSidebar />
-          <main className="flex gap-2 h-full w-full overflow-hidden">
-            <SidebarTrigger />
-            <div className="flex flex-col w-full p-4 overflow-hidden">
-              <Navbar />
-              <div className="flex-1 overflow-hidden">{children}</div>
-            </div>
+          <main className="flex flex-col h-full w-full overflow-hidden">
+            <Navbar />
+            <div className="flex-1 overflow-hidden overflow-y-auto">{children}</div>
           </main>
         </SidebarProvider>
       </body>

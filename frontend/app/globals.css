@@ -143,8 +143,6 @@
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -153,4 +151,26 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Global scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+  border-radius: 10px;
+}
+
+/* Scrollbar thumb (handle) */
+::-webkit-scrollbar-thumb {
+  background: #2e2e2e;
+  border-radius: 10px;
+}
+
+/* Scrollbar hover effect */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

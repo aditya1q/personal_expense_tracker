@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { headers, Expense_List } from "@/constants/constant";
 
-const Table = () => {
+const DataTable = () => {
     const [currentRows, setCurrentRows] = useState([]);
     const [visibleRows, setVisibleRows] = useState(6);
     const observer = useRef();
@@ -77,4 +77,4 @@ const Table = () => {
     );
 };
 
-export default React.memo(Table);
+export default React.memo(DataTable);

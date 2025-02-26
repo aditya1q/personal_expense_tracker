@@ -1,6 +1,5 @@
-// components/Search.js
-import { Search as SearchIcon } from "lucide-react"; // Rename to avoid conflict
-import { Input } from "@/components/ui/input"; // Adjust path to Shadcn Input
+import { Search as SearchIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const Search = ({ placeholder = "Search transactions..." }) => {
     return (
