@@ -17,11 +17,6 @@ export const MenuItems = [
     url: "/analytics",
     icon: PieChart,
   },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
 ];
 
 // chart data (Areachart)

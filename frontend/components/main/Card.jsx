@@ -2,7 +2,7 @@ import { ArrowUpRight, IndianRupee } from 'lucide-react';
 
 const Card = ({ title, value }) => {
     return (
-        <div className="bg-gradient-to-br from-[#1F2128] to-[#2A2D37] rounded-2xl w-1/3 h-32 py-4 px-3 lg:px-6 flex flex-col items-center shadow-lg">
+        <div className="bg-gradient-to-br from-[#1F2128] to-[#2A2D37] rounded-2xl w-1/4 h-32 py-4 px-3 lg:px-6 flex flex-col items-center shadow-lg">
             <div className="flex items-center gap-1 w-full">
                 <IndianRupee className="text-green-400" size={20} />
                 <h1 className="text-sm font-medium text-[#9CA3AF]">{title}</h1>
