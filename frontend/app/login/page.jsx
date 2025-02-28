@@ -1,4 +1,3 @@
-// app/login/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -13,9 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { fetchLoginUser } from "../api/auth";
 
 export default function Login() {
   const router = useRouter();
@@ -36,28 +36,31 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
     try {
-      // Simulate API call - replace with your actual authentication logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (!formData.email || !formData.password) {
-        throw new Error("Please fill in all fields");
-      }
-
-      // Here you would typically call your authentication API
-    //   toast({
-    //     title: "Success!",
-    //     description: "Logged in successfully",
-    //   });
-      
-      // Redirect to dashboard after successful login
+      const response = await fetchLoginUser({
+        email: formData.email,
+        password: formData.password,
+      })
+      toast({
+        title: "Success!",
+        description: response.message || "Login successfully",
+      });
       router.push("/dashboard");
     } catch (error) {
-    //   toast({
-    //     title: "Error",
-    //     description: error instanceof Error ? error.message : "Login failed",
-    //     variant: "destructive",
-    //   });
+      toast({
+        title: "Error",
+        description: error.message || "Login failed",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -100,17 +103,17 @@ export default function Login() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Don&apos;t have an account?{" "}
-              <Link 
-                href="/register" 
+              <Link
+                href="/register"
                 className="text-primary hover:underline"
               >
                 Register

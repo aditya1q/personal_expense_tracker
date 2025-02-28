@@ -1,8 +1,6 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import AppSidebar from "@/components/layout/Sidebar";
-import Navbar from "@/components/layout/Navbar";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,33 +21,13 @@ export const metadata = {
   charset: "UTF-8",
 };
 
-const isAuthenticated = true;
-
 export default function RootLayout({ children }) {
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
-  const isAuthPage = pathname === "/login" || pathname === "/register";
-
-  // If on login/register page or not authenticated, show just the children
-  if (!isAuthenticated || isAuthPage) {
-    return (
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex-1 h-screen w-screen overflow-hidden`}>
-          {children}
-        </body>
-      </html>
-    );
-  }
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex h-screen w-screen overflow-hidden`}>
-        <SidebarProvider>
-          <AppSidebar />
-          <main className="flex flex-col h-full w-full overflow-hidden">
-            <Navbar />
-            <div className="flex-1 overflow-hidden overflow-y-auto">{children}</div>
-          </main>
-        </SidebarProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex-1 h-screen w-screen overflow-hidden`}>
+        <Toaster position="bottom-right" richColors />
+        {children}
       </body>
     </html>
   );
