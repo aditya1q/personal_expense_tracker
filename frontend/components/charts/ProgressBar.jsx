@@ -11,7 +11,7 @@ const ProgressBar = () => {
 
     return (
         <div className="w-full">
-            <h2 className="text-lg font-semibold mb-4">Category-wise Spending</h2>
+            <h1 className="text-[15px] font-semibold mb-4">Category-wise Spending</h1>
             {categoryProgress.map((item) => (
                 <div key={item.category} className="mb-4">
                     <p className="text-sm mb-1">{item.category}</p>

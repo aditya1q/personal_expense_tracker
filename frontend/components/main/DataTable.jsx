@@ -94,10 +94,11 @@ const DataTable = ({ title, height }) => {
             </div>
 
             {openForm && (
-                <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center z-30">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 w-screen h-screen">
                     <TransactionForm setOpenForm={setOpenForm} />
                 </div>
             )}
+
         </div>
     );
 };

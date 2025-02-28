@@ -23,7 +23,23 @@ export const metadata = {
   charset: "UTF-8",
 };
 
+const isAuthenticated = true;
+
 export default function RootLayout({ children }) {
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+
+  // If on login/register page or not authenticated, show just the children
+  if (!isAuthenticated || isAuthPage) {
+    return (
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex-1 h-screen w-screen overflow-hidden`}>
+          {children}
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark flex h-screen w-screen overflow-hidden`}>
