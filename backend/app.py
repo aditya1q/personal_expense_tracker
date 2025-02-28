@@ -1,54 +1,101 @@
+# app.py
+import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 import bcrypt
+import jwt
+import os
+from dotenv import load_dotenv
+import secrets
 
-# Step 1: Connect to MongoDB
-client = MongoClient('mongodb://localhost:27017/')  # Local MongoDB connection
-db = client['personal_expense_tracker']  # Access the database
-users_collection = db['users']  # Access the collection
+# Load environment variables from .env file
+load_dotenv()
 
-# Step 2: Initialize Flask app
+# Connect to MongoDB
+client = MongoClient('mongodb://localhost:27017/')
+db = client['personal_expense_tracker']
+users_collection = db['users']
+tokens_collection = db['tokens']  # New collection for refresh tokens
+
+# Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for cross-origin requests (e.g., from your Next.js frontend)
+CORS(app)
+SECRET_KEY = os.getenv("SECRET_KEY")  # Get from environment variable
 
-# Step 4: Define the GET route to fetch data from MongoDB
+# Check if SECRET_KEY is set
+if not SECRET_KEY:
+    raise ValueError("No SECRET_KEY set in environment variables")
+
+# Generate access token (short-lived, 24 hours)
+def generate_access_token(email):
+    return jwt.encode(
+        {
+            "email": email,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)  # Expires in 24 hours
+        },
+        SECRET_KEY, # type: ignore
+        algorithm="HS256"
+    )
+
+# Generate refresh token (long-lived, e.g., 7 days)
+def generate_refresh_token():
+    return secrets.token_hex(32)  # 64-character random hexadecimal string
+
+# Store refresh token in MongoDB
+def store_refresh_token(user_email, refresh_token):
+    tokens_collection.insert_one({
+        "email": user_email,
+        "refresh_token": refresh_token,
+        "created_at": datetime.datetime.utcnow(),
+        "expires_at": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # Expires in 30 days
+    })
+
+# Define the POST route for registering a user
 @app.route('/api/v1/register', methods=["POST"])
 def register_user():
-    # return jsonify({"message":"Hello from the expense tracker API"})
     try:
-        # get data from the req body(like we are doing req.body.json in node)
         user_data = request.get_json()
-
-        # username email and password is required
         if not user_data or "username" not in user_data or "email" not in user_data or "password" not in user_data:
-            return jsonify({"message": "Missing required field: username, email, password"}), 400
+            return jsonify({"message": "Missing required fields: username, email, password"}), 400
         
-        # if email is registered then show that meessage
         if users_collection.find_one({"email": user_data["email"]}):
             return jsonify({"message": "User with this email already exists"}), 409
         
-        password = user_data["password"].encode('utf-8') # convert to bytes
-        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt()) # Hash with salt
+        # Hash the password
+        password = user_data["password"].encode('utf-8')
+        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
 
+        # Insert user into MongoDB
         users_collection.insert_one({
             "username": user_data["username"],
             "email": user_data["email"],
             "password": hashed_password
         })
-        return jsonify({"message":"User registered successfully"}), 201
+
+        # Generate tokens
+        access_token = generate_access_token(user_data["email"])
+        refresh_token = generate_refresh_token()
+        
+        # Store refresh token
+        store_refresh_token(user_data["email"], refresh_token)
+
+        return jsonify({
+            "message": "User registered successfully",
+            # "access_token": access_token,
+            "refresh_token": refresh_token
+        }), 201
 
     except Exception as e:
-        return jsonify({"error": str(0)}), 500
+        return jsonify({"error": str(e)}), 500
 
-
+# Define the POST route for logging in a user
 @app.route('/api/v1/login', methods=["POST"])
-
 def login_user():
     try:
         login_data = request.get_json()
         if not login_data or "email" not in login_data or "password" not in login_data:
-            return jsonify({"message": "Missing required field: email, password"}), 400
+            return jsonify({"message": "Missing required fields: email, password"}), 400
         
         # Find the user by email
         user = users_collection.find_one({"email": login_data["email"]})
@@ -56,17 +103,59 @@ def login_user():
             return jsonify({"message": "Invalid email or password"}), 401
         
         # Verify the password
-        input_password = login_data['password'].encode('utf-8')
+        input_password = login_data["password"].encode('utf-8')
         stored_password = user["password"]
 
         if bcrypt.checkpw(input_password, stored_password):
-            return jsonify({"message": 'Login successfull', "username": user["username"]}), 200
+            # Generate tokens
+            access_token = generate_access_token(user["email"])
+            refresh_token = generate_refresh_token()
+            
+            # Store refresh token
+            store_refresh_token(user["email"], refresh_token)
+
+            return jsonify({
+                "message": "Login successful",
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "username": user["username"]
+            }), 200
         else:
-            return jsonify({"message": "Invailid email or password"}), 401       
+            return jsonify({"message": "Invalid email or password"}), 401
         
     except Exception as e:
-        return jsonify({"error": str(0)}), 500
+        return jsonify({"error": str(e)}), 500
 
-# Step 6: Run the Flask server and initialize data
+# Define the POST route for refreshing the access token
+@app.route('/api/v1/refresh', methods=["POST"])
+def refresh_token():
+    try:
+        refresh_token = request.json.get("refresh_token") # type: ignore
+        if not refresh_token:
+            return jsonify({"message": "No refresh token provided"}), 401
+        
+        # Find the refresh token in MongoDB
+        token_doc = tokens_collection.find_one({"refresh_token": refresh_token})
+        if not token_doc:
+            return jsonify({"message": "Invalid refresh token"}), 401
+        
+        # Check if refresh token is expired
+        if token_doc["expires_at"] < datetime.datetime.utcnow():
+            tokens_collection.delete_one({"refresh_token": refresh_token})  # Clean up expired token
+            return jsonify({"message": "Refresh token has expired"}), 401
+        
+        # Generate new access token
+        new_access_token = generate_access_token(token_doc["email"])
+
+        return jsonify({
+            "message": "Token refreshed successfully",
+            "access_token": new_access_token,
+            "refresh_token": refresh_token  # Return same refresh token
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Run the Flask server
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

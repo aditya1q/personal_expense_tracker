@@ -1,0 +1,53 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual Environment
+venv/
+.env/
+*.env
+
+# Logs and Cache
+*.log
+*.cache
+*.sqlite3
+
+# IDE and Editor Config
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing and Coverage Reports
+.coverage
+htmlcov/
+pytest_cache/
+
+# Packaging and Build Files
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebooks Checkpoints
+.ipynb_checkpoints/
+
+# macOS system files
+.DS_Store
+
+# Temporary Files
+*.bak
+*.tmp
+
+# Database
+db.sqlite3
+*.db
+
+# Static and Media Files
+staticfiles/
+media/
+
+# Django Secret Key
+settings_local.py
