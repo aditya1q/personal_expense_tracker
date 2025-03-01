@@ -1,4 +1,3 @@
-# app.py
 import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -16,7 +15,10 @@ load_dotenv()
 client = MongoClient('mongodb://localhost:27017/')
 db = client['personal_expense_tracker']
 users_collection = db['users']
-tokens_collection = db['tokens']  # New collection for refresh tokens
+transaction_collection = db['transactions']
+card_collection = db['cards']
+chart_collection = db['charts']
+tokens_collection = db['tokens']
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -38,7 +40,6 @@ def generate_access_token(email):
         algorithm="HS256"
     )
 
-# Generate refresh token (long-lived, e.g., 7 days)
 def generate_refresh_token():
     return secrets.token_hex(32)  # 64-character random hexadecimal string
 
@@ -48,7 +49,7 @@ def store_refresh_token(user_email, refresh_token):
         "email": user_email,
         "refresh_token": refresh_token,
         "created_at": datetime.datetime.utcnow(),
-        "expires_at": datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # Expires in 30 days
+        "expires_at": datetime.datetime.utcnow() + datetime.timedelta(days=30)
     })
 
 # Define the POST route for registering a user
@@ -82,7 +83,7 @@ def register_user():
 
         return jsonify({
             "message": "User registered successfully",
-            # "access_token": access_token,
+            "access_token": access_token,
             "refresh_token": refresh_token
         }), 201
 
@@ -118,7 +119,8 @@ def login_user():
                 "message": "Login successful",
                 "access_token": access_token,
                 "refresh_token": refresh_token,
-                "username": user["username"]
+                "username": user["username"],
+                "email": user["email"]
             }), 200
         else:
             return jsonify({"message": "Invalid email or password"}), 401
@@ -156,6 +158,34 @@ def refresh_token():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/api/expense/transaction', methods=["POST"])
+def expense_transaction():
+    try:
+        # Ensure JSON content
+        if not request.is_json:
+            return jsonify({"message": "Request must be JSON"}), 400
+        
+        # Get and validate data
+        transactions = request.get_json()
+        required_fields = ["amount", "category", "description", "payment_method"]
+
+        if not all(field in transactions for field in required_fields):
+            return jsonify({"message": "Missing required fields: amount, category, description, payment_method"}), 400
+
+        # Insert data into MongoDB
+        transaction_collection.insert_one({
+            "amount": transactions["amount"],
+            "category": transactions["category"],
+            "description": transactions["description"],
+            "payment_method": transactions["payment_method"]
+        })
+
+        return jsonify({"message": "Data added successfully"}), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
 # Run the Flask server
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
