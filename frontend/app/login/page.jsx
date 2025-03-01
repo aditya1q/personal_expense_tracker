@@ -38,7 +38,7 @@ export default function Login() {
     setIsLoading(true);
 
     if (!formData.email || !formData.password) {
-      toast.error("Please fill in all required fields"); // Use toast.error with a string message
+      toast.error("Please fill in all required fields");
       setIsLoading(false);
       return;
     }
@@ -47,19 +47,17 @@ export default function Login() {
         email: formData.email,
         password: formData.password,
       })
-      console.log(response)
-      console.log(response.access_token)
-      console.log(response.refresh_token)
       ls.set("access_token", response.access_token);
       ls.set("refresh_token", response.refresh_token);
       ls.set("username", response.username);
-      document.cookie = `access_token=${response.access_token}; path=/; max-age=86400`; // Sync with cookie
-      toast.success("Registration Successful", { // Use toast.success with a message and options
+      ls.set("email", response.email);
+      document.cookie = `access_token=${response.access_token}; path=/; max-age=86400`;
+      toast.success("Registration Successful", {
         description: response.message || "User registered successfully",
       });
       router.push("/dashboard");
     } catch (error) {
-      toast.error("Registration Failed", { // Use toast.error with a message and options
+      toast.error("Registration Failed", {
         description: error.message || "An error occurred",
       });
     } finally {

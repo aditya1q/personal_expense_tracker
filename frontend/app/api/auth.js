@@ -20,6 +20,7 @@ export const fetchRefreshToken = (refreshToken) => {
     .then(res => {
       ls.set("access_token", res.data.access_token);
       ls.set("refresh_token", res.data.refresh_token);
+      document.cookie = `access_token=${res.data.access_token}; path=/; max-age=86400`;
       return res.data;
     })
     .catch(error => { throw error.response?.data || error; });
