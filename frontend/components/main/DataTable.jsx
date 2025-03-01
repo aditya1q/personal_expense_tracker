@@ -41,8 +41,8 @@ const DataTable = ({ title, height }) => {
     };
 
     return (
-        <div style={{ height: `${height}` }} className="w-full rounded-lg border border-[#1F2937] bg-transparent relative">
-            <div className="flex justify-between w-full p-6 items-center sticky top-0 z-20 bg-black">
+        <div style={{ height: `${height}` }} className="w-full rounded-lg border border-[#1F2937] bg-transparent relative overflow-hidden">
+            <div className="flex justify-between w-full p-6 items-center sticky top-0 z-20 bg-transparent">
                 <h1 className="text-xl font-bold">{title}</h1>
                 <button onClick={handleOpenForm} className="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition duration-300 flex items-center gap-2">
                     <PlusIcon />Add Transaction
@@ -56,8 +56,7 @@ const DataTable = ({ title, height }) => {
                             {headers.map((header) => (
                                 <th
                                     key={header.id}
-                                    className="text-[12px] p-5 text-left border border-opacity-50 font-normal border-[#1F2937]"
-                                    style={{ width: header.width || "auto" }}
+                                    className="text-[14px] p-5 text-left font-semibold"
                                 >
                                     {header.label}
                                 </th>
@@ -77,13 +76,9 @@ const DataTable = ({ title, height }) => {
                                     {headers.map((header) => (
                                         <td
                                             key={header.id}
-                                            className="p-5 font-light hover:font-normal "
+                                            className="p-5 font-light hover:font-normal text-left"
                                         >
-                                            {header.id === "Amount" ? (
-                                                <div className="text-left">${row[header.id]}</div>
-                                            ) : (
-                                                row[header.id]
-                                            )}
+                                            {row[header.id]}
                                         </td>
                                     ))}
                                 </tr>

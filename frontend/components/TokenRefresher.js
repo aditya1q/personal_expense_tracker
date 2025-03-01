@@ -2,15 +2,15 @@
 import { useEffect } from "react";
 import { fetchRefreshToken } from "@/app/api/auth";
 import { useRouter } from "next/navigation";
-import ls from 'localstorage-slim'
 import { jwtDecode } from "jwt-decode";
+import { getCookie } from "@/utils/coockie";
 
 export default function TokenRefresher() {
   const router = useRouter();
 
   useEffect(() => {
-    const refreshToken = ls.get("refresh_token");
-    const accessToken = ls.get("access_token");
+    const refreshToken = getCookie("refresh_token");
+    const accessToken = getCookie("access_token");
 
     if (refreshToken && accessToken) {
       const refreshTokenFn = async () => {
@@ -27,9 +27,9 @@ export default function TokenRefresher() {
           }
         } catch (error) {
           console.error("Token refresh failed:", error);
-          ls.remove("access_token");
-          ls.remove("refresh_token");
           document.cookie = "access_token=; path=/; max-age=0";
+          document.cookie = "refresh_token=; path=/; max-age=0";
+          document.cookie = "username=; path=/; max-age=0";
           router.push("/login");
         }
       };

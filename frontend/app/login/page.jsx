@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchLoginUser } from "../api/auth";
-import ls from 'localstorage-slim'
 
 export default function Login() {
   const router = useRouter();
@@ -47,17 +46,16 @@ export default function Login() {
         email: formData.email,
         password: formData.password,
       })
-      ls.set("access_token", response.access_token);
-      ls.set("refresh_token", response.refresh_token);
-      ls.set("username", response.username);
-      ls.set("email", response.email);
       document.cookie = `access_token=${response.access_token}; path=/; max-age=86400`;
-      toast.success("Registration Successful", {
-        description: response.message || "User registered successfully",
+      document.cookie = `refresh_token=${response.refresh_token}; path=/; max-age=2592000`;
+      document.cookie = `username=${response.username}; path=/; max-age=2592000`;
+      document.cookie = `email=${response.email}; path=/; max-age=2592000`;
+      toast.success("Login Successful", {
+        description: response.message || "Logged in successfully",
       });
       router.push("/dashboard");
     } catch (error) {
-      toast.error("Registration Failed", {
+      toast.error("Login Failed", {
         description: error.message || "An error occurred",
       });
     } finally {

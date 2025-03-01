@@ -1,4 +1,3 @@
-// app/components/layout/AppSidebar.js
 "use client";
 
 import { Wallet, ChevronsUpDown } from "lucide-react";
@@ -19,16 +18,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { MenuItems } from "@/constants/constant";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import ls from "localstorage-slim";
 import { useState, useEffect } from "react";
+import { getCookie } from "@/utils/coockie";
 
-// Simple Skeleton Component
 function Skeleton({ className }) {
-  return <div className={`animate-pulse bg-gray-300 rounded ${className}`}></div>;
+  return <div className={`animate-pulse bg-gray-800 rounded ${className}`}></div>;
 }
 
 export default function AppSidebar() {
@@ -37,32 +36,28 @@ export default function AppSidebar() {
   const [username, setUsername] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch username from local storage only on the client side
   useEffect(() => {
-    const storedUsername = ls.get("username");
+    const storedUsername = getCookie("username");
     setUsername(storedUsername);
     setIsLoading(false);
   }, []);
 
-  // Handle sign out
   const handleSignOut = () => {
-    console.log("Signing out..."); // Debug log
-    ls.remove("username"); // Remove username
-    ls.remove("access_token"); // Remove access token
-    ls.remove("refresh_token"); // Remove refresh token
-    document.cookie = "access_token=; path=/; max-age=0"; // Clear cookie
-    setUsername(null); // Update state to reflect logout
-    router.push("/login"); // Navigate to /login
-    router.refresh(); // Force a refresh to ensure navigation
+    console.log("Signing out...");
+    document.cookie = "username=; path=/; max-age=0";
+    document.cookie = "access_token=; path=/; max-age=0";
+    document.cookie = "refresh_token=; path=/; max-age=0";
+    setUsername(null);
+    router.push("/login");
+    router.refresh();
   };
 
-  // Handle account navigation
   const handleAccount = () => {
-    router.push("/expense"); // Navigate to /expense
+    router.push("/analytics");
   };
 
   return (
-    <Sidebar className="bg-[#111116]">
+    <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-3 w-full">
           <Wallet className="text-[#2563EB] w-5 h-5 shrink-0" />
@@ -74,7 +69,7 @@ export default function AppSidebar() {
               </>
             ) : (
               <>
-                <span className="truncate font-semibold text-[14px]">
+                <span className="truncate font-rubik-bold capitalize text-[14px]">
                   {username || "username"}
                 </span>
                 <span className="truncate text-[12px] text-[#6B7280]">
@@ -84,7 +79,7 @@ export default function AppSidebar() {
             )}
           </div>
         </div>
-        <span className="border-t border-[#E2E8F0] w-[100%]"></span>
+        <SidebarSeparator />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -100,17 +95,12 @@ export default function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link
                         href={item.url}
-                        className={`flex items-center gap-3 text-[14px] p-2 rounded ${
-                          isActive
-                            ? "bg-[#3B82F610] text-[#3B82F6]"
-                            : "hover:bg-[#3B82F610] hover:text-[#3B82F6]"
-                        }`}
-                      >
-                        <item.icon
-                          className={`w-5 h-5 ${
-                            isActive ? "text-[#3B82F6]" : "hover:text-[#3B82F6]"
+                        className={`flex items-center gap-3 text-[14px] p-2 rounded ${isActive
+                          ? "bg-[#3B82F610] text-[#3B82F6]"
+                          : "hover:bg-[#3B82F610] hover:text-[#3B82F6]"
                           }`}
-                        />
+                      >
+                        <item.icon className={`w-5 h-5 ${isActive ? "text-[#3B82F6]" : "hover:text-[#3B82F6]"}`} />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -121,6 +111,7 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarSeparator />
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -131,7 +122,7 @@ export default function AppSidebar() {
                   {isLoading ? (
                     <Skeleton className="h-4 w-20 ml-2" />
                   ) : (
-                    <span className="text-[14px] capitalize">
+                    <span className="text-[14px] capitalize font-rubik-semibold">
                       {username || "username"}
                     </span>
                   )}
@@ -144,9 +135,6 @@ export default function AppSidebar() {
               >
                 <DropdownMenuItem onClick={handleAccount}>
                   <span>Account</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Billing</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                   <span>Sign out</span>

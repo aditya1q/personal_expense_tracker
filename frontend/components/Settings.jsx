@@ -1,118 +1,113 @@
-// app/settings/page.tsx
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-// import { toast } from "@/components/ui/use-toast";
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return null;
+}
 
 const Settings = () => {
-  const [formData, setFormData] = useState({
+  const [settings, setSettings] = useState({
     username: "johndoe",
     email: "john@example.com",
     notifications: true,
     darkMode: false,
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Here you would typically save to an API
-    // toast({
-    //   title: "Settings saved!",
-    //   description: "Your preferences have been updated.",
-    // });
-  };
+  useEffect(() => {
+    const storedUsername = getCookie("username") || "johndoe";
+    const storedEmail = getCookie("email") || "john@example.com";
+    setSettings((prev) => ({
+      ...prev,
+      username: storedUsername,
+      email: storedEmail,
+    }));
+  }, [])
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleSwitchChange = (name) => (checked) => {
-    setFormData({
-      ...formData,
+    setSettings({
+      ...settings,
       [name]: checked,
     });
   };
 
   return (
-    // <div className=" py-10 w-full">
-      <Card className="w-full flex justify-between items-center px-4">
-        <div className="w-full">
-          <CardHeader>
-            <CardTitle>Settings</CardTitle>
-            {/* <CardDescription>Manage your account preferences</CardDescription> */}
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6">
-              {/* Account Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Account</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                  />
-                </div>
+    <Card className="w-full flex justify-between items-center px-4">
+      <div className="w-full">
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+        </CardHeader>
+        <form>
+          <CardContent className="space-y-6">
+            {/* Account Section */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Account</h3>
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  name="username"
+                  placeholder="johndoe"
+                  value={settings.username}
+                  readOnly
+                />
               </div>
-            </CardContent>
-          </form>
-        </div>
-        <div className="space-y-4 w-full">
-          <h3 className="text-lg font-medium">Preferences</h3>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Email Notifications</Label>
-              <p className="text-sm text-muted-foreground">
-                Receive email notifications
-              </p>
-            </div>
-            <Switch
-                  checked={formData.notifications}
-                  onCheckedChange={handleSwitchChange("notifications")}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={settings.email}
+                  readOnly
                 />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Dark Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Enable dark theme
-              </p>
+              </div>
             </div>
-            <Switch
-                  checked={formData.darkMode}
-                  onCheckedChange={handleSwitchChange("darkMode")}
-                />
+          </CardContent>
+        </form>
+      </div>
+      <div className="space-y-4 w-full">
+        <h3 className="text-lg font-medium">Preferences</h3>
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label>Email Notifications</Label>
+            <p className="text-sm text-muted-foreground">
+              Receive email notifications
+            </p>
           </div>
+          <Switch
+            checked={settings.notifications}
+            onCheckedChange={handleSwitchChange("notifications")}
+          />
         </div>
-      </Card>
-    // </div>
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label>Dark Mode</Label>
+            <p className="text-sm text-muted-foreground">
+              Enable dark theme
+            </p>
+          </div>
+          <Switch
+            checked={settings.darkMode}
+            onCheckedChange={handleSwitchChange("darkMode")}
+          />
+        </div>
+      </div>
+    </Card>
   );
 }
 
