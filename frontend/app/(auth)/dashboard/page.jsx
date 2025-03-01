@@ -20,7 +20,7 @@ const Dashboard = () => {
         ))}
       </div>
       <DashboardAreaChart />
-      <DataTable title='Recent Transactions' height='400px'/>
+      <DataTable title='Recent Transactions' height='400px' />
     </div>
   );
 };

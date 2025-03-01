@@ -1,41 +1,26 @@
 import axios from "axios";
+import ls from 'localstorage-slim'
 
-const api_url = process.env.NEXT_PUBLIC_API_URL;
+const api_url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export const fetchRegisterUser = (userData) => {
   return axios.post(`${api_url}/v1/register`, userData)
-    .then(res => {
-      console.log("Register User API Response:", res.data);
-      return res.data;
-    })
-    .catch(error => {
-      console.error("Registration Error:", error.response?.data || error.message);
-      throw error.response?.data || error;
-    });
+    .then(res => res.data)
+    .catch(error => { throw error.response?.data || error; });
 };
 
+export const fetchLoginUser = (credentials) => {
+  return axios.post(`${api_url}/v1/login`, credentials)
+    .then(res => res.data)
+    .catch(error => { throw error.response?.data || error; });
+};
 
-export const fetchLoginUser = (loginData) => {
-  return axios.post(`${api_url}/v1/login`, loginData)
+export const fetchRefreshToken = (refreshToken) => {
+  return axios.post(`${api_url}/v1/refresh`, { refresh_token: refreshToken })
     .then(res => {
-      console.log("Login API Response:", res.data);
-      return res.data
+      ls.set("access_token", res.data.access_token);
+      ls.set("refresh_token", res.data.refresh_token);
+      return res.data;
     })
-    .catch(error => {
-      console.error("Login Error:", error.response?.data || error.message);
-      throw error.response?.data || error;
-    });
-}
-
-
-export const fetchRefershToken = (refershToken) => {
-  return axios.post(`${api_url}/v1/refersh`, refershToken)
-    .then(res => {
-      console.log('Refersh Token API Response', res.data)
-      return res.data
-    })
-    .catch(error => {
-      console.error("Refersh Token Error:", error.response?.data || error.message);
-      throw error.response?.data || error;
-    });
-}
+    .catch(error => { throw error.response?.data || error; });
+};

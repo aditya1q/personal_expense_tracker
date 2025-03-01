@@ -16,7 +16,7 @@ export const metadata = {
   title: "Personal Expense Tracker",
   description: "Track your daily expenses and manage your budget with ease. Built with Next.js for a fast and seamless experience.",
   keywords: "expense tracker, personal finance, budgeting, Next.js",
-  author: "Your Name or Team",
+  author: "Aditya Tiwari",
   viewport: "width=device-width, initial-scale=1.0",
   charset: "UTF-8",
 };

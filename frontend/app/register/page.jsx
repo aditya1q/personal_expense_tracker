@@ -21,10 +21,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -32,22 +29,12 @@ export default function Register() {
     setIsLoading(true);
 
     if (!formData.username || !formData.email || !formData.password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields"); // Use toast.error with a string message
       setIsLoading(false);
       return;
     }
-
-    // handle error if password !== confirmPassword
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords don't match",
-        variant: "destructive",
-      });
+      toast.error("Passwords don't match"); // Use toast.error with a string message
       setIsLoading(false);
       return;
     }
@@ -58,19 +45,13 @@ export default function Register() {
         email: formData.email,
         password: formData.password,
       });
-
-      toast({
-        title: "Success!",
-        description: response.message || "User created successfully",
+      toast.success("Registration Successful", { // Use toast.success with a message and options
+        description: response.message || "User registered successfully",
       });
-      // redirect to login page if success(201)
       router.push("/login");
     } catch (error) {
-      console.error("Error in handleSubmit:", error); // Debug log
-      toast({
-        title: "Error",
-        description: error.message || "Registration failed",
-        variant: "destructive",
+      toast.error("Registration Failed", { // Use toast.error with a message and options
+        description: error.message || "An error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -137,13 +118,11 @@ export default function Register() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating Account..." : "Register"}
+              {isLoading ? "Registering..." : "Register"}
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
+              <Link href="/login" className="text-primary hover:underline">Sign in</Link>
             </div>
           </CardFooter>
         </form>

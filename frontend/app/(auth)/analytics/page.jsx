@@ -1,7 +1,7 @@
 import ExpenseBarChart from '@/components/charts/ExpenseBarChart'
 import ProgressBar from '@/components/charts/ProgressBar'
 import React from 'react'
-import Settings from '../settings/Settings'
+import Settings from '@/components/Settings'
 
 const Analytics = () => {
   return (
