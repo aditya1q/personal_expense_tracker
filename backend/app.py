@@ -168,24 +168,45 @@ def expense_transaction():
         
         # Get and validate data
         transactions = request.get_json()
-        required_fields = ["amount", "category", "description", "payment_method"]
+        required_fields = ["date", "amount", "category", "description", "payment_method"]
 
         if not all(field in transactions for field in required_fields):
-            return jsonify({"message": "Missing required fields: amount, category, description, payment_method"}), 400
+            return jsonify({"message": "Missing required fields: date, amount, category, description, payment_method"}), 400
 
-        # Insert data into MongoDB
-        transaction_collection.insert_one({
+        new_transaction = {
+            "date": transactions["date"],
             "amount": transactions["amount"],
             "category": transactions["category"],
             "description": transactions["description"],
             "payment_method": transactions["payment_method"]
-        })
+        }
+        result = transaction_collection.insert_one(new_transaction)
 
-        return jsonify({"message": "Data added successfully"}), 200
+        # Add the inserted _id to the new_transaction dictionary
+        new_transaction["_id"] = str(result.inserted_id)  # Convert ObjectId to string for JSON compatibility
+
+        return jsonify({"message": "Data added successfully", "transaction": new_transaction}), 201
 
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/expense/transaction', methods=["GET"])
+def get_expense_transaction():
+
+    try:
+        getTransaction = list(transaction_collection.find())
+        for transaction in getTransaction:
+            transaction['id'] = str(transaction['_id'])
+            transaction.pop('_id')
+
+        return jsonify(getTransaction)
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 # Run the Flask server
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
