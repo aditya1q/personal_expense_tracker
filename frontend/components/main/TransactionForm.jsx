@@ -7,42 +7,56 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
-import { fetchTransactionForm } from '@/app/api/form';
+import { fetchTransactionForm } from '@/app/api/transaction';
 import { toast } from 'sonner';
+import { DatePicker } from '../DatePicker';
 
-const TransactionForm = ({ setOpenForm }) => {
+const TransactionForm = ({ setOpenForm, onAddTransaction }) => {
     const [formData, setFormData] = useState({
         amount: '',
         category: '',
         description: '',
         payment_method: ''
     });
+    const [date, setDate] = React.useState()
     const [isLoading, setIsLoading] = useState(false);
+    // console.log(formData)
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!formData.amount || !formData.category || !formData.description || !formData.payment_method) {
             toast.error("Please fill in all required fields");
-            setIsLoading(false);
             return;
         }
 
+        setIsLoading(true);
         try {
-            const response = fetchTransactionForm({
-                amount: formData.amount,
-                category: formData.category,
-                description: formData.description,
-                payment_method: formData.payment_method
-            })
-            toast.success("Transaction successful", {
-                description: response.message || "Trasaction added successfully",
+            const response = await fetchTransactionForm({
+                date: date,
+                ...formData
             });
-            // console.log('Transaction Data:', response.message);
+
+            // Ensure new transaction structure matches the table structure
+            // const newTransaction = {
+            //     id: response.transaction.id, // Use the new ID from backend
+            //     date: response.transaction.date,
+            //     amount: response.transaction.amount,
+            //     category: response.transaction.category,
+            //     description: response.transaction.description,
+            //     payment_method: response.transaction.payment_method,
+            // };
+
+            // Update table immediately without refreshing
+            onAddTransaction(response);
+
+            toast.success("Transaction successful", {
+                description: response.message || "Transaction added successfully",
+            });
+            setOpenForm(false);
         } catch (error) {
             toast.error("Transaction Failed", {
                 description: error.message || "An error occurred",
@@ -50,8 +64,8 @@ const TransactionForm = ({ setOpenForm }) => {
         } finally {
             setIsLoading(false);
         }
-
     };
+
 
     return (
         <Card className="max-w-md w-full mx-auto">
@@ -67,6 +81,10 @@ const TransactionForm = ({ setOpenForm }) => {
 
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className='flex flex-col gap-1'>
+                        <Label htmlFor="date">Date</Label>
+                        <DatePicker date={date} setDate={setDate} />
+                    </div>
                     <div>
                         <Label htmlFor="amount">Amount</Label>
                         <Input
@@ -115,8 +133,8 @@ const TransactionForm = ({ setOpenForm }) => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="cash">Cash</SelectItem>
-                                <SelectItem value="credit_card">Credit Card</SelectItem>
-                                <SelectItem value="debit_car">Debit Card</SelectItem>
+                                <SelectItem value="Credit Card">Credit Card</SelectItem>
+                                <SelectItem value="Debit Card">Debit Card</SelectItem>
                                 <SelectItem value="gpay">Online Payment</SelectItem>
                             </SelectContent>
                         </Select>

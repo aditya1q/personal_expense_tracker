@@ -6,3 +6,9 @@ export const fetchTransactionForm = (formData) => {
         .then(res => res.data)
         .catch(error => { throw error.response?.data || error; });
 }
+
+export const fetchTransactionData = () => {
+    return axios.get(`${api_url}/expense/transaction`)
+        .then(res => res.data)
+        .catch(error => { throw error.response?.data || error; });
+}

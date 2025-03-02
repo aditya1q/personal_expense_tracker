@@ -114,19 +114,10 @@ export const chartData = [
   { date: "2024-06-30", desktop: 446, },
 ]
 
-// table data
-export const Expense_List = Array.from({ length: 100 }, (_, index) => ({
-  Date: `2025-02-${String((index % 28) + 1).padStart(2, "0")}`,
-  Description: `Expense ${index + 1} - ${["Groceries", "Rent", "Utilities", "Entertainment", "Transport"][index % 5]}`,
-  Category: ["Groceries", "Housing", "Utilities", "Entertainment", "Transport"][index % 5],
-  Amount: (Math.random() * 500 + 10).toFixed(2),
-  Payment: ["Cash", "Credit Card", "Debit Card", "Bank Transfer"][index % 4],
-}));
-
 export const headers = [
-  { id: "Date", label: "Date", width: "20%" },
-  { id: "Description", label: "Description", width: "30%" },
-  { id: "Category", label: "Category", width: "20%" },
-  { id: "Amount", label: "Amount ($)", width: "15%" },
-  { id: "Payment", label: "Payment Method", width: "15%" },
+  { id: "date", label: "Date", width: "20%" },
+  { id: "description", label: "Description", width: "30%" },
+  { id: "category", label: "Category", width: "20%" },
+  { id: "amount", label: "Amount (₹)", width: "15%" },
+  { id: "payment_method", label: "Payment Method", width: "15%" },
 ];
