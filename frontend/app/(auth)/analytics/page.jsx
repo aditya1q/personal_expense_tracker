@@ -6,7 +6,7 @@ import Settings from '@/components/Settings'
 const Analytics = () => {
   return (
     <div className="h-full flex flex-col gap-3 w-full font-[family-name:var(--font-geist-sans)] p-4">
-      <div className='flex gap-10'>
+      <div className='flex gap-10 h-[50%]'>
         <ExpenseBarChart />
         <ProgressBar />
       </div>

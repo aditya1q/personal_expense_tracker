@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-import { chartData } from "@/constants/constant";
 
 import {
     Card,
@@ -23,6 +22,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { fetchExpenseOverview } from "@/app/api/chart";
+import { groupByDate } from "@/utils/groupByDate";
 
 const chartConfig = {
     visitors: {
@@ -41,18 +42,38 @@ const timeRanges = [
 ];
 
 const DashboardAreaChart = () => {
-    const [timeRange, setTimeRange] = React.useState(timeRanges[0].value);
+    const [chartData, setChartData] = useState([]);
+    const [timeRange, setTimeRange] = useState(timeRanges[0].value);
 
-    const getFilteredData = React.useMemo(() => {
+    // Filter chart data based on the selected time range
+    const filteredData = useMemo(() => {
         const selectedRange = timeRanges.find((range) => range.value === timeRange);
         if (!selectedRange) return chartData;
 
-        const referenceDate = new Date("2024-06-30");
-        const startDate = new Date(referenceDate);
-        startDate.setDate(referenceDate.getDate() - selectedRange.days);
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - selectedRange.days);
 
-        return chartData.filter((item) => new Date(item.date) >= startDate);
-    }, [timeRange]);
+        return chartData.filter((item) => {
+            const itemDate = new Date(item.date);
+            return itemDate >= startDate;
+        });
+    }, [chartData, timeRange]);
+
+    useEffect(() => {
+        const getChartData = async () => {
+            try {
+                const response = await fetchExpenseOverview();
+                const groupData = groupByDate(response)
+                setChartData(groupData);
+            } catch (error) {
+                console.log("Error fetching data:", error);
+                setChartData([]);
+            } finally {
+            }
+        };
+        getChartData();
+    }, []);
 
     return (
         <Card>
@@ -84,7 +105,7 @@ const DashboardAreaChart = () => {
                     config={chartConfig}
                     className="aspect-auto h-[250px] w-full"
                 >
-                    <AreaChart data={getFilteredData}>
+                    <AreaChart data={filteredData}>
                         <defs>
                             <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                                 <stop
@@ -128,7 +149,7 @@ const DashboardAreaChart = () => {
                             }
                         />
                         <Area
-                            dataKey="desktop"
+                            dataKey="amount"
                             type="natural"
                             fill="url(#fillDesktop)"
                             stroke="var(--color-desktop)"

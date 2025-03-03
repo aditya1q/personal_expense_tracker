@@ -18,7 +18,7 @@ const TransactionForm = ({ setOpenForm, onAddTransaction }) => {
         description: '',
         payment_method: ''
     });
-    const [date, setDate] = React.useState()
+    const [date, setDate] = React.useState(() => new Date())
     const [isLoading, setIsLoading] = useState(false);
     // console.log(formData)
 

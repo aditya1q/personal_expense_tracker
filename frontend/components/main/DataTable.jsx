@@ -7,7 +7,7 @@ import TransactionForm from "./TransactionForm";
 import { fetchTransactionData } from "@/app/api/transaction";
 import { format } from "date-fns";
 
-const DataTable = ({ title, height }) => {
+const DataTable = ({ title, height, limit }) => {
     const [visibleRows, setVisibleRows] = useState(6);
     const [openForm, setOpenForm] = useState(false);
     const [data, setdata] = useState([]);
@@ -35,21 +35,22 @@ const DataTable = ({ title, height }) => {
         [loadMoreRows]
     );
 
+    const getdata = async () => {
+        setIsLoading(true);
+        try {
+            const data = await fetchTransactionData();
+            const getTransactions = limit ? data.slice(-5) : data
+            setdata(getTransactions)
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            setdata([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
     useEffect(() => {
-        const getdata = async () => {
-            setIsLoading(true);
-            try {
-                const data = await fetchTransactionData();
-                setdata(data)
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setdata([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         getdata();
-    }, []);
+    }, [limit]);
 
     const formatDate = (dateStr) => {
         if (!dateStr || isNaN(new Date(dateStr).getTime())) {
@@ -69,7 +70,7 @@ const DataTable = ({ title, height }) => {
 
     return (
         <div
-            style={{ height: `${height}` }}
+            style={{ maxHeight: `${height}` }}
             className="w-full rounded-lg border border-[#1F2937] bg-transparent relative overflow-hidden"
         >
             <div className="flex justify-between w-full p-6 items-center sticky top-0 z-20 bg-transparent">
@@ -124,17 +125,18 @@ const DataTable = ({ title, height }) => {
                                 </td>
                             </tr>
                         ) : (
-                            data.slice(0, visibleRows).map((row, rowIndex) => {
+                            data.slice(0, visibleRows).reverse().map((row, rowIndex) => {
                                 const isLastRow = rowIndex === Math.min(visibleRows, data.length) - 1;
                                 return (
                                     <tr
                                         key={rowIndex}
                                         ref={isLastRow ? (node) => observeLastRow(node) : null}
+                                        className="hover:bg-[#242528] hover:font-normal"
                                     >
                                         {headers.map((header) => (
                                             <td
                                                 key={header.id}
-                                                className="p-5 font-light hover:font-normal text-left"
+                                                className="p-5 font-light text-left capitalize"
                                             >
                                                 {header.id === "date" ? formatDate(row[header.id]) : row[header.id]}
                                             </td>
