@@ -5,7 +5,8 @@ import DataTable from '@/components/main/DataTable';
 
 const Dashboard = () => {
   const cardData = [
-    { title: 'Total Balance', value: 24242 },
+    { title: 'Total Savings', value: 24242 },
+    { title: 'Total Expenses', value: 24242 },
     { title: 'Monthly Spending', value: 343545 },
     { title: 'Monthly Savings', value: 64333 },
     { title: 'Monthly Income', value: 34433 },

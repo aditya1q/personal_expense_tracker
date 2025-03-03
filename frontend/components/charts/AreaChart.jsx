@@ -60,20 +60,21 @@ const DashboardAreaChart = () => {
         });
     }, [chartData, timeRange]);
 
+    const getChartData = async () => {
+        try {
+            const response = await fetchExpenseOverview();
+            const groupData = groupByDate(response)
+            setChartData(groupData);
+        } catch (error) {
+            console.log("Error fetching data:", error);
+            setChartData([]);
+        } finally {
+        }
+    };
     useEffect(() => {
-        const getChartData = async () => {
-            try {
-                const response = await fetchExpenseOverview();
-                const groupData = groupByDate(response)
-                setChartData(groupData);
-            } catch (error) {
-                console.log("Error fetching data:", error);
-                setChartData([]);
-            } finally {
-            }
-        };
         getChartData();
     }, []);
+
 
     return (
         <Card>

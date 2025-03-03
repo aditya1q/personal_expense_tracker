@@ -75,12 +75,14 @@ const DataTable = ({ title, height, limit }) => {
         >
             <div className="flex justify-between w-full p-6 items-center sticky top-0 z-20 bg-transparent">
                 <h1 className="text-xl font-bold">{title}</h1>
-                <button
-                    onClick={handleOpenForm}
-                    className="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition duration-300 flex items-center gap-2"
-                >
-                    <PlusIcon />Add Transaction
-                </button>
+                {!limit &&
+                    <button
+                        onClick={handleOpenForm}
+                        className="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition duration-300 flex items-center gap-2"
+                    >
+                        <PlusIcon />Add Transaction
+                    </button>
+                }
             </div>
 
             <table

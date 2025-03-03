@@ -39,17 +39,7 @@ const TransactionForm = ({ setOpenForm, onAddTransaction }) => {
                 date: date,
                 ...formData
             });
-
-            // Ensure new transaction structure matches the table structure
-            // const newTransaction = {
-            //     id: response.transaction.id, // Use the new ID from backend
-            //     date: response.transaction.date,
-            //     amount: response.transaction.amount,
-            //     category: response.transaction.category,
-            //     description: response.transaction.description,
-            //     payment_method: response.transaction.payment_method,
-            // };
-
+            
             // Update table immediately without refreshing
             onAddTransaction(response);
 
