@@ -52,6 +52,7 @@ def store_refresh_token(user_email, refresh_token):
         "expires_at": datetime.datetime.utcnow() + datetime.timedelta(days=30)
     })
 
+
 # Define the POST route for registering a user
 @app.route('/api/v1/register', methods=["POST"])
 def register_user():
@@ -89,6 +90,7 @@ def register_user():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # Define the POST route for logging in a user
 @app.route('/api/v1/login', methods=["POST"])
@@ -128,6 +130,7 @@ def login_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 # Define the POST route for refreshing the access token
 @app.route('/api/v1/refresh', methods=["POST"])
 def refresh_token():
@@ -158,7 +161,7 @@ def refresh_token():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
+# Define the POST route for expense transaction
 @app.route('/api/expense/transaction', methods=["POST"])
 def expense_transaction():
     try:
@@ -191,7 +194,7 @@ def expense_transaction():
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
 
-
+# Define the GET route for get all expense transaction
 @app.route('/api/expense/transaction', methods=["GET"])
 def get_expense_transaction():
 
@@ -202,6 +205,42 @@ def get_expense_transaction():
             transaction.pop('_id')
 
         return jsonify(getTransaction)
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# Define the GET route for get all expense transaction in chart
+@app.route('/api/expense/transaction/chart', methods=["GET"])
+def get_expense_transaction_chart():
+    try:
+        # Ensure unique index on 'date' and 'amount' in chart_collection (run once)
+        chart_collection.create_index([("date", 1), ("amount", 1)], unique=True)
+
+        # Fetch only 'date' and 'amount' fields from transaction_collection
+        transaction_chart = list(transaction_collection.find({}, {"date": 1, "amount": 1, "category": 1}))
+
+        # Store the chart data (update or insert if not exists)
+        for transaction in transaction_chart:
+            chart_collection.update_one(
+                {"date": transaction["date"], "amount": transaction["amount"]},  # Match existing
+                {"$set": {
+                    "date": transaction["date"],
+                    "amount": transaction["amount"],
+                    "category": transaction["category"]
+                }},
+                upsert=True  # Insert if not exists
+            )
+
+        # Retrieve and return the stored chart data with id
+        stored_chart_data = list(chart_collection.find({}, {"_id": 1, "date": 1, "amount": 1, "category":1}))
+
+        # Convert ObjectId to string for JSON serialization
+        for transaction in stored_chart_data:
+            transaction["id"] = str(transaction["_id"])
+            transaction.pop("_id")
+
+        return jsonify(stored_chart_data), 200
+
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
