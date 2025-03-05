@@ -1,13 +1,28 @@
-
 import DashboardAreaChart from '@/components/charts/AreaChart';
 import Card from '@/components/main/Card';
 import DataTable from '@/components/main/DataTable';
-import { fetchCardData } from '@/app/api/card'
+import { fetchCardData, fetchExpenseOverview, fetchTransactionData } from '@/app/api';
+import { Suspense } from 'react';
+import { groupByDate } from '@/utils/groupByDate';
+
+export const dynamic = 'force-dynamic'; // Optional: Force dynamic rendering if needed
 
 const Dashboard = async () => {
-  const cardData = await fetchCardData();
+  let cardData, chartData, transactionData;
+  try {
+    [cardData, chartData, transactionData] = await Promise.all([
+      fetchCardData(),
+      fetchExpenseOverview(),
+      fetchTransactionData(),
+    ]);
+  } catch (error) {
+    console.error('Failed to fetch dashboard data:', error);
+    cardData = { total_savings: 0, total_expense: 0, monthly_expense: 0, monthly_savings: 0, monthly_income: 0 };
+    chartData = [];
+    transactionData = [];
+  }
 
-  const data = [
+  const cardList = [
     { title: 'Total Savings', value: cardData.total_savings },
     { title: 'Total Expenses', value: cardData.total_expense },
     { title: 'Monthly Spending', value: cardData.monthly_expense },
@@ -15,15 +30,23 @@ const Dashboard = async () => {
     { title: 'Monthly Income', value: cardData.monthly_income },
   ];
 
+  const groupedChartData = groupByDate(chartData); 
+
   return (
     <div className="min-h-screen flex flex-col gap-6 w-full font-[family-name:var(--font-geist-sans)] p-4">
-      <div className="flex gap-5 w-full">
-        {data?.map((card, index) => (
-          <Card key={index} title={card.title} value={card.value} />
-        ))}
-      </div>
-      <DashboardAreaChart />
-      <DataTable title='Recent Transactions' height='465px' limit={5} />
+      <Suspense fallback={<div>Loading cards...</div>}>
+        <div className="flex gap-5 w-full">
+          {cardList.map((card, index) => (
+            <Card key={index} title={card.title} value={card.value} />
+          ))}
+        </div>
+      </Suspense>
+      <Suspense fallback={<div>Loading chart...</div>}>
+        <DashboardAreaChart initialData={groupedChartData} />
+      </Suspense>
+      <Suspense fallback={<div>Loading table...</div>}>
+        <DataTable title="Recent Transactions" height="465px" limit={5} initialData={transactionData} />
+      </Suspense>
     </div>
   );
 };

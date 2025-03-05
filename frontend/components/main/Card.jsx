@@ -7,17 +7,16 @@ const Card = ({ title, value }) => {
                 <IndianRupee className="text-green-400" size={20} />
                 <h1 className="text-sm font-medium text-[#9CA3AF]">{title}</h1>
             </div>
-
             <p className="text-2xl font-extrabold text-white mt-2 w-full">{value}</p>
-
             <div className="flex items-center gap-1 mt-1 w-full">
                 <ArrowUpRight className="text-green-500" size={16} />
                 <p className="text-xs font-medium text-green-400">+1.22% from last month</p>
             </div>
-
-            <p className="text-xs font-medium text-gray-400 mt-1 w-full">Today's spending: <span className="text-red-400">$345.50</span></p>
+            <p className="text-xs font-medium text-gray-400 mt-1 w-full">
+                Today's spending: <span className="text-red-400">$345.50</span>
+            </p>
         </div>
     );
-}
+};
 
 export default Card;

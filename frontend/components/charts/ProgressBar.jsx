@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { fetchExpenseOverview } from '@/app/api/chart';
-import { Progress } from '@/components/ui/progress';
+import { fetchExpenseOverview } from '@/app/api';
 
 const ProgressBar = () => {
     const [categoryData, setCategoryData] = useState([]);
