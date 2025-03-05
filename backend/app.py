@@ -19,6 +19,7 @@ transaction_collection = db['transactions']
 card_collection = db['cards']
 chart_collection = db['charts']
 tokens_collection = db['tokens']
+income_collection = db['income']
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -51,7 +52,6 @@ def store_refresh_token(user_email, refresh_token):
         "created_at": datetime.datetime.utcnow(),
         "expires_at": datetime.datetime.utcnow() + datetime.timedelta(days=30)
     })
-
 
 # Define the POST route for registering a user
 @app.route('/api/v1/register', methods=["POST"])
@@ -91,7 +91,6 @@ def register_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 # Define the POST route for logging in a user
 @app.route('/api/v1/login', methods=["POST"])
 def login_user():
@@ -129,7 +128,6 @@ def login_user():
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # Define the POST route for refreshing the access token
 @app.route('/api/v1/refresh', methods=["POST"])
@@ -214,9 +212,9 @@ def get_expense_transaction():
 def get_expense_transaction_chart():
     try:
         # Ensure unique index on 'date' and 'amount' in chart_collection (run once)
-        chart_collection.create_index([("date", 1), ("amount", 1)], unique=True)
+        chart_collection.create_index([("date", 1), ("amount", 1), ("category", 1)], unique=True)
 
-        # Fetch only 'date' and 'amount' fields from transaction_collection
+        # Fetch only 'date', 'amount' and 'catogory' fields from transaction_collection
         transaction_chart = list(transaction_collection.find({}, {"date": 1, "amount": 1, "category": 1}))
 
         # Store the chart data (update or insert if not exists)
@@ -245,7 +243,112 @@ def get_expense_transaction_chart():
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
 
+# Define the GET route for get transaction overview in dashboard card
+@app.route('/api/expense/overview', methods=["GET"])
+def get_expense_overview():
+    try:
+        current_time = datetime.datetime.utcnow()
+        # print(current_time)
+        current_year = current_time.year
+        current_month = current_time.month
 
+        # Check the last recorded month in income_collection
+        income_record = income_collection.find_one({"_id": "monthly_income_tracker"})
+        
+        if income_record:
+            last_year = income_record.get("last_year", 0)
+            last_month = income_record.get("last_month", 0)
+            total_income = income_record.get("total_income", 0.0)
+        else:
+            # Initialize if no record exists
+            last_year = current_year
+            last_month = current_month - 1 if current_month > 1 else 12
+            total_income = 0.0
+
+        # Calculate months passed since last update
+        months_passed = (current_year - last_year) * 12 + (current_month - last_month)
+        if months_passed > 0:
+            # Add 30,000 for each new month
+            total_income += 30000.0 * months_passed
+            # Update the income record
+            income_collection.update_one(
+                {"_id": "monthly_income_tracker"},
+                {
+                    "$set": {
+                        "total_income": total_income,
+                        "last_year": current_year,
+                        "last_month": current_month
+                    }
+                },
+                upsert=True
+            )
+
+        monthly_income = 30000.0  # Base income per month
+        cumulative_income = total_income  # Total income up to this point
+
+        # --- Fetch Expenses ---
+        expenses = list(transaction_collection.aggregate([
+            {"$match": {"date": {"$exists": True}}},
+            {"$project": {"date": {"$dateFromString": {"dateString": "$date"}}, "amount": 1, "_id": 0}},
+            {
+                "$match": {
+                    "$expr": {
+                        "$and": [
+                            {"$eq": [{"$year": "$date"}, current_year]},
+                            {"$eq": [{"$month": "$date"}, current_month]},
+                        ]
+                    }
+                }
+            }
+        ]))
+
+        total_expense = 0.0
+        for expense in expenses:
+            try:
+                total_expense += float(expense.get("amount", 0))
+            except (ValueError, TypeError):
+                print(f"Invalid amount in expense: {expense}")
+                continue
+
+        # Financial calculations
+        monthly_expense = total_expense
+        monthly_savings = monthly_income - monthly_expense
+        total_savings = cumulative_income - monthly_expense  # Total savings includes all past income
+
+        # --- Sync to card_collection ---
+        if expenses:
+            for expense in expenses:
+                card_collection.update_one(
+                    {
+                        "year": current_year,
+                        "month": current_month,
+                        "date": expense["date"]
+                    },
+                    {
+                        "$set": {
+                            "amount": expense["amount"],
+                            "year": current_year,
+                            "month": current_month
+                        }
+                    },
+                    upsert=True
+                )
+
+        # JSON response
+        return jsonify({
+            "year": current_year,
+            "month": current_month,
+            "total_expense": total_expense,
+            "monthly_income": monthly_income,  # Income for current month
+            "cumulative_income": cumulative_income,  # Total income accumulated
+            "monthly_expense": monthly_expense,
+            "monthly_savings": monthly_savings,
+            "total_savings": total_savings
+        })
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
 # Run the Flask server
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
