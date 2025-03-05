@@ -1,27 +1,29 @@
-import React from 'react';
+
 import DashboardAreaChart from '@/components/charts/AreaChart';
 import Card from '@/components/main/Card';
 import DataTable from '@/components/main/DataTable';
+import { fetchCardData } from '@/app/api/card'
 
-const Dashboard = () => {
-  const cardData = [
-    { title: 'Total Savings', value: 24242 },
-    { title: 'Total Expenses', value: 24242 },
-    { title: 'Monthly Spending', value: 343545 },
-    { title: 'Monthly Savings', value: 64333 },
-    { title: 'Monthly Income', value: 34433 },
+const Dashboard = async () => {
+  const cardData = await fetchCardData();
+
+  const data = [
+    { title: 'Total Savings', value: cardData.total_savings },
+    { title: 'Total Expenses', value: cardData.total_expense },
+    { title: 'Monthly Spending', value: cardData.monthly_expense },
+    { title: 'Monthly Savings', value: cardData.monthly_savings },
+    { title: 'Monthly Income', value: cardData.monthly_income },
   ];
 
   return (
     <div className="min-h-screen flex flex-col gap-6 w-full font-[family-name:var(--font-geist-sans)] p-4">
-      {/* <h1 className="text-3xl font-bold text-white mb-8">Dashboard Overview</h1> */}
       <div className="flex gap-5 w-full">
-        {cardData?.map((card, index) => (
-          <Card key={index} title={card.title} value={card?.value.toLocaleString('en-IN')} />
+        {data?.map((card, index) => (
+          <Card key={index} title={card.title} value={card.value} />
         ))}
       </div>
       <DashboardAreaChart />
-      <DataTable title='Recent Transactions' height='465px' limit={5}/>
+      <DataTable title='Recent Transactions' height='465px' limit={5} />
     </div>
   );
 };
