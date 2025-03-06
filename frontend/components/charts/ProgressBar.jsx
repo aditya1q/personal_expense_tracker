@@ -50,20 +50,37 @@ const ProgressBar = () => {
     const totalAmount = categoryData.reduce((sum, item) => sum + item.amount, 0);
 
     return (
-        <div className="w-full">
-            <h1 className="text-[15px] font-semibold mb-4">Category-wise Spending</h1>
-            {categoryData.map((item, index) => (
-                <div key={item.id || `${item.category}-${index}`} className="mb-4">
-                    <p className="text-sm mb-1">{item.category}</p>
-                    <div className="relative w-full h-2 rounded-full overflow-hidden bg-gray-200">
-                        <div
-                            className="absolute top-0 left-0 h-full"
-                            style={{ width: `${item.amount}%`, backgroundColor: barColors[index % barColors.length] }}
-                        ></div>
+        <div className="w-full h-full p-4 rounded-lg shadow-sm">
+            <div className="text-lg flex justify-between items-center font-semibold mb-6 sticky top-0 z-10">
+                <h1>Category-wise Spending</h1>
+                <p className='pr-4'>₹{totalAmount.toLocaleString('en-IN')}</p>
+            </div>
+            <div className="flex-1 h-full overflow-y-auto space-y-5 pr-4 pb-12">
+                {categoryData.map((item, index) => (
+                    <div
+                        key={item.id || `${item.category}-${index}`}
+                        className="space-y-2"
+                    >
+                        <div className="flex justify-between items-center">
+                            <p className="text-sm font-medium">
+                                {item.category}
+                            </p>
+                            <p className="text-sm font-semibold">
+                                ₹{item.amount.toLocaleString()}
+                            </p>
+                        </div>
+                        <div className="relative w-full h-3 rounded-full overflow-hidden bg-gray-100">
+                            <div
+                                className="absolute top-0 left-0 h-full rounded-full transition-all duration-300"
+                                style={{
+                                    width: `${Math.min(item.amount, 100)}%`,
+                                    backgroundColor: barColors[index % barColors.length]
+                                }}
+                            ></div>
+                        </div>
                     </div>
-                    <p className="text-sm mt-1">{item.amount}₹</p>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
 
     );
