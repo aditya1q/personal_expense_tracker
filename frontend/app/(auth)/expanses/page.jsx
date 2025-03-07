@@ -3,7 +3,6 @@ import React from 'react'
 import { Suspense } from 'react';
 import { fetchTransactionData } from '@/app/api';
 
-export const dynamic = 'force-dynamic'; // Optional: Force dynamic rendering if needed
 const Expanses = async () => {
   let transactionData;
 

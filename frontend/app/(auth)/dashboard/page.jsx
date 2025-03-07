@@ -5,7 +5,7 @@ import { fetchCardData, fetchExpenseOverview, fetchTransactionData } from '@/app
 import { Suspense } from 'react';
 import { groupByDate } from '@/utils/groupByDate';
 
-export const dynamic = 'force-dynamic'; // Optional: Force dynamic rendering if needed
+export const dynamic = 'force-dynamic';
 
 const Dashboard = async () => {
   let cardData, chartData, transactionData;
