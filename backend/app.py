@@ -12,7 +12,9 @@ import secrets
 load_dotenv()
 
 # Connect to MongoDB
-client = MongoClient('mongodb://localhost:27017/')
+MONGO_URI = os.getenv("MONGO_URI")
+print(MONGO_URI)
+client = MongoClient(MONGO_URI)
 db = client['personal_expense_tracker']
 users_collection = db['users']
 transaction_collection = db['transactions']
