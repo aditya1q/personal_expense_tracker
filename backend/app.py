@@ -13,7 +13,6 @@ load_dotenv()
 
 # Connect to MongoDB
 MONGO_URI = os.getenv("MONGO_URI")
-print(MONGO_URI)
 client = MongoClient(MONGO_URI)
 db = client['personal_expense_tracker']
 users_collection = db['users']
