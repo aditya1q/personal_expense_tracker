@@ -1,4 +1,4 @@
-const api_url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const api_url = process.env.NEXT_PUBLIC_API_URL;
 
 // Server-side fetch with caching
 export const fetchCardData = async () => {

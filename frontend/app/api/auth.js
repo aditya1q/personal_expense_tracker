@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const api_url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const api_url = process.env.NEXT_PUBLIC_API_URL;
 
 export const fetchRegisterUser = (userData) => {
   return axios.post(`${api_url}/v1/register`, userData)
